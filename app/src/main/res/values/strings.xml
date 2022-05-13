@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Aws Cognito</string>
+    <string name="user_pool_id">your user pool</string>
+    <string name="client_id">your client id</string>
+</resources>
