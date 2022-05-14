@@ -10,4 +10,8 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(private val repo:MainRepository) : ViewModel()  {
 
     fun registerUser(user: User) = repo.registerUser(user)
+
+    fun verifyOtp(user: User,otp:String) = repo.verifyOtp(otp,user)
+
+    val resendOtp = repo.resendOtp()
 }

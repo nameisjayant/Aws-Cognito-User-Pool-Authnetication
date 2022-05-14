@@ -98,19 +98,20 @@ fun RegisterScreen(
         item {
             Button(
                 onClick = {
-                          isDialog = true
-                   scope.launch(Dispatchers.Main){
-                       viewModel.registerUser(
-                           User(
-                               name,
-                               email,
-                               mobile,
-                               password
-                           )
-                       ).collect{
-                           Toast.makeText(context,it,Toast.LENGTH_SHORT).show()
-                       }
-                   }
+                    isDialog = true
+                    scope.launch(Dispatchers.Main) {
+                        viewModel.registerUser(
+                            User(
+                                name,
+                                email,
+                                mobile,
+                                password
+                            )
+                        ).collect {
+                            isDialog = false
+                            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }, modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp)
@@ -155,7 +156,13 @@ fun RegisterScreen(
                             color = Color.Gray,
                         )
                     ) {
-
+                        isDialog = true
+                        scope.launch(Dispatchers.Main) {
+                            viewModel.resendOtp.collect {
+                                isDialog = false
+                                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                            }
+                        }
                     }
                 }
             }
@@ -164,6 +171,16 @@ fun RegisterScreen(
         item {
             Button(
                 onClick = {
+                    isDialog = true
+                    scope.launch(Dispatchers.Main) {
+                        viewModel.verifyOtp(
+                            User(email = email, password = password),
+                            otp
+                        ).collect {
+                            isDialog = false
+                            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }, modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp)

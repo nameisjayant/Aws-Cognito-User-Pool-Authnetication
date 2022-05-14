@@ -1,9 +1,12 @@
 package com.codingwithjks.awscognito.repository
 
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.SignUpHandler
+import android.util.Log
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.*
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationContinuation
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationDetails
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.ChallengeContinuation
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.MultiFactorAuthenticationContinuation
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.*
 import com.amazonaws.services.cognitoidentityprovider.model.SignUpResult
 import com.codingwithjks.awscognito.model.User
 import kotlinx.coroutines.channels.awaitClose
@@ -15,6 +18,8 @@ class MainRepository @Inject
 constructor(private val cognitoUserPool: CognitoUserPool) {
 
 
+    private var cognitoUser:CognitoUser? = null
+
     fun registerUser(user: User) = callbackFlow{
         val userAttributes = CognitoUserAttributes()
         userAttributes.addAttribute("name",user.name)
@@ -24,6 +29,7 @@ constructor(private val cognitoUserPool: CognitoUserPool) {
         val signHandler = object : SignUpHandler{
             override fun onSuccess(user: CognitoUser?, signUpResult: SignUpResult?) {
                 trySend("otp sent")
+                cognitoUser = user
             }
 
             override fun onFailure(exception: Exception?) {
@@ -44,5 +50,92 @@ constructor(private val cognitoUserPool: CognitoUserPool) {
 
     }
 
+
+    fun verifyOtp(otp:String,user: User) = callbackFlow {
+
+        val cognitoUser = cognitoUserPool.getUser(user.email.trim())
+
+        val getDetailHandler = object : GetDetailsHandler{
+            override fun onSuccess(cognitoUserDetails: CognitoUserDetails?) {
+                Log.d("main", "onSuccess: ${cognitoUserDetails?.attributes?.attributes?.get("sub")!!} ")
+            }
+
+            override fun onFailure(exception: Exception?) {
+                trySend("${exception?.message}")
+            }
+
+        }
+
+        val authHandler = object : AuthenticationHandler{
+            override fun onSuccess(userSession: CognitoUserSession?, newDevice: CognitoDevice?) {
+                Log.d("main", "onSuccess: ${userSession?.idToken?.jwtToken}")
+                cognitoUser.getDetailsInBackground(getDetailHandler)
+            }
+
+            override fun getAuthenticationDetails(
+                authenticationContinuation: AuthenticationContinuation?,
+                userId: String?
+            ) {
+                val authDetail = AuthenticationDetails(
+                    userId,
+                    user.password.trim(),
+                    null
+                )
+                authenticationContinuation?.setAuthenticationDetails(authDetail)
+                authenticationContinuation?.continueTask()
+            }
+
+            override fun getMFACode(continuation: MultiFactorAuthenticationContinuation?) {
+                continuation?.continueTask()
+            }
+
+            override fun authenticationChallenge(continuation: ChallengeContinuation?) {
+               continuation?.continueTask()
+            }
+
+            override fun onFailure(exception: Exception?) {
+                trySend("${exception?.message}")
+            }
+
+        }
+
+        val genricHandler = object : GenericHandler{
+            override fun onSuccess() {
+                trySend("otp verify")
+                cognitoUser.getSessionInBackground(authHandler)
+            }
+
+            override fun onFailure(exception: Exception?) {
+                trySend("${exception?.message}")
+            }
+
+        }
+
+        cognitoUser.confirmSignUpInBackground(otp.trim(),false,genricHandler)
+
+        awaitClose {  }
+
+    }
+
+
+    fun resendOtp() = callbackFlow {
+
+        val verificationHandler = object :VerificationHandler{
+            override fun onSuccess(verificationCodeDeliveryMedium: CognitoUserCodeDeliveryDetails?) {
+                trySend("otp sent again")
+            }
+
+            override fun onFailure(exception: Exception?) {
+                trySend("${exception?.message}")
+            }
+
+        }
+
+        cognitoUser?.resendConfirmationCodeInBackground(verificationHandler)
+
+        awaitClose {  }
+
+
+    }
 
 }
