@@ -14,4 +14,10 @@ class MainViewModel @Inject constructor(private val repo:MainRepository) : ViewM
     fun verifyOtp(user: User,otp:String) = repo.verifyOtp(otp,user)
 
     val resendOtp = repo.resendOtp()
+
+    fun login(user: User)  = repo.login(user)
+
+    fun forgetPassword(user: User) = repo.forgetPassword(user)
+
+    fun changeForgetPassword(user: User,otp: String) = repo.changeForgetPassword(otp,user)
 }

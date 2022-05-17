@@ -1,5 +1,6 @@
 package com.codingwithjks.awscognito.ui.screen
 
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,6 +15,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.codingwithjks.awscognito.AnotherActivity
 import com.codingwithjks.awscognito.model.User
 import com.codingwithjks.awscognito.viewmodel.MainViewModel
 import kotlinx.coroutines.Dispatchers
@@ -236,7 +238,7 @@ fun RegisterScreen(
                             color = Color.Gray,
                         )
                     ) {
-
+                        context.startActivity(Intent(context,AnotherActivity::class.java))
                     }
                 }
             }
@@ -245,6 +247,16 @@ fun RegisterScreen(
         item {
             Button(
                 onClick = {
+                          isDialog = true
+                    scope.launch(Dispatchers.Main){
+                        viewModel.login(
+                            User(email = loginEmail)
+                        ).collect{
+                            isDialog = false
+                            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
                 }, modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp)
