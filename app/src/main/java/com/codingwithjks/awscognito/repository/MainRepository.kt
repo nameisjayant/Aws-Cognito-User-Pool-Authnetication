@@ -193,6 +193,7 @@ class MainRepository @Inject constructor(
         }
 
         cognitoUser.getSessionInBackground(authHandler)
+         awaitClose { }
 
     }
 
@@ -218,6 +219,7 @@ class MainRepository @Inject constructor(
         }
 
         cognitoUser.forgotPasswordInBackground(forgetHandler)
+         awaitClose { }
 
     }
 
@@ -238,5 +240,5 @@ class MainRepository @Inject constructor(
 
     }
 
-
+ awaitClose { }
 }
