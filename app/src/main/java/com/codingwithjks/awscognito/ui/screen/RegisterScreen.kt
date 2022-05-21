@@ -33,6 +33,8 @@ fun RegisterScreen(
     var otp by remember { mutableStateOf("") }
     var loginEmail by remember { mutableStateOf("") }
     var loginPassword by remember { mutableStateOf("") }
+    var oldPassword by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
     var isDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
@@ -238,7 +240,7 @@ fun RegisterScreen(
                             color = Color.Gray,
                         )
                     ) {
-                        context.startActivity(Intent(context,AnotherActivity::class.java))
+                        context.startActivity(Intent(context, AnotherActivity::class.java))
                     }
                 }
             }
@@ -247,11 +249,11 @@ fun RegisterScreen(
         item {
             Button(
                 onClick = {
-                          isDialog = true
-                    scope.launch(Dispatchers.Main){
+                    isDialog = true
+                    scope.launch(Dispatchers.Main) {
                         viewModel.login(
                             User(email = loginEmail)
-                        ).collect{
+                        ).collect {
                             isDialog = false
                             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
                         }
@@ -264,6 +266,72 @@ fun RegisterScreen(
                 Text(text = "Login", modifier = Modifier.padding(vertical = 10.dp))
             }
         }
+
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 30.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(text = "Reset password", fontWeight = FontWeight.Bold)
+            }
+        }
+
+        item{
+
+            Column() {
+                OutlinedTextField(
+                    value = loginEmail, onValueChange = {
+                        loginEmail = it
+                    },
+                    placeholder = { Text(text = "Enter email") },
+                    label = { Text(text = "Email") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                )
+
+                OutlinedTextField(
+                    value = oldPassword, onValueChange = {
+                        oldPassword = it
+                    },
+                    placeholder = { Text(text = "Enter Old Password") },
+                    label = { Text(text = "Old Password") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                )
+
+
+                OutlinedTextField(
+                    value = newPassword, onValueChange = {
+                        newPassword = it
+                    },
+                    placeholder = { Text(text = "Enter New Password") },
+                    label = { Text(text = "New Password") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                )
+
+            }
+
+        }
+
+        item {
+            Button(
+                onClick = {
+
+                }, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+            ) {
+                Text(text = "Reset Password", modifier = Modifier.padding(vertical = 10.dp))
+            }
+        }
+
+
 
     }
 
