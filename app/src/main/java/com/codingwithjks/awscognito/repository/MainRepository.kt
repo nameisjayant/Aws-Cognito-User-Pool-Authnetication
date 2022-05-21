@@ -8,6 +8,7 @@ import com.amazonaws.services.cognitoidentityprovider.model.SignUpResult
 import com.codingwithjks.awscognito.model.User
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
 import java.lang.Exception
 import javax.inject.Inject
 
@@ -223,7 +224,7 @@ class MainRepository @Inject constructor(
 
     }
 
-    fun changeForgetPassword(otp: String,user: User) = callbackFlow {
+    fun changeForgetPassword(otp: String,user: User) = flow {
 
         if(mForgetPassword != null){
 
@@ -231,14 +232,13 @@ class MainRepository @Inject constructor(
                 setVerificationCode(otp.trim())
                 setPassword(user.password.trim())
                 continueTask()
-                trySend("password changed successfully..!!")
+                emit("password changed successfully..!!")
             }
 
         }else{
-            trySend("something went Wrong")
+            emit("something went Wrong")
         }
 
     }
 
- awaitClose { }
 }
