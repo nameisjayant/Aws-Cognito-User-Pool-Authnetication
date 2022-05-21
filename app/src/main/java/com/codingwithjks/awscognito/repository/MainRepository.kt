@@ -241,4 +241,30 @@ class MainRepository @Inject constructor(
 
     }
 
+    fun resetPassword(user:User,oldPasword:String,newPassword:String) = callbackFlow {
+
+        val cognitoUser = cognitoUserPool.getUser(user.email.trim())
+
+        val genericHandler = object : GenericHandler{
+            override fun onSuccess() {
+                trySend("password changed successfully")
+            }
+
+            override fun onFailure(exception: Exception?) {
+                trySend("${exception?.message}")
+            }
+
+        }
+
+        cognitoUser.changePasswordInBackground(
+            oldPasword.trim(),
+            newPassword.trim(),
+            genericHandler
+        )
+
+        awaitClose {  }
+
+    }
+
+
 }

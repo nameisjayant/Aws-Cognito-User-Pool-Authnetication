@@ -19,6 +19,7 @@ import com.codingwithjks.awscognito.AnotherActivity
 import com.codingwithjks.awscognito.model.User
 import com.codingwithjks.awscognito.viewmodel.MainViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @Composable
@@ -278,7 +279,7 @@ fun RegisterScreen(
             }
         }
 
-        item{
+        item {
 
             Column() {
                 OutlinedTextField(
@@ -323,6 +324,20 @@ fun RegisterScreen(
             Button(
                 onClick = {
 
+                    isDialog = true
+                    scope.launch(Dispatchers.Main) {
+                        viewModel.resetPassword(
+                            User(email = loginEmail),
+                            oldPassword,
+                            newPassword
+                        ).collect {
+                            isDialog = false
+                            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                        }
+
+                    }
+
+
                 }, modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp)
@@ -330,7 +345,6 @@ fun RegisterScreen(
                 Text(text = "Reset Password", modifier = Modifier.padding(vertical = 10.dp))
             }
         }
-
 
 
     }

@@ -20,4 +20,6 @@ class MainViewModel @Inject constructor(private val repo:MainRepository) : ViewM
     fun forgetPassword(user: User) = repo.forgetPassword(user)
 
     fun changeForgetPassword(user: User,otp: String) = repo.changeForgetPassword(otp,user)
+
+    fun resetPassword(user: User,oldPassword:String,newPassword:String) = repo.resetPassword(user,oldPassword,newPassword)
 }
